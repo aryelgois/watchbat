@@ -1,5 +1,7 @@
 use std::{fmt, io, num};
 
+use crate::validate::ValidationError;
+
 /// Convenient wrapper around `std::Result`.
 pub type Result<T> = ::std::result::Result<T, Error>;
 
@@ -9,13 +11,6 @@ pub enum Error {
     Io(io::Error),
     Parse(num::ParseIntError),
     Validation(ValidationError),
-}
-
-/// An error when validating data.
-#[derive(Debug)]
-pub enum ValidationError {
-    Max(u8),
-    Order(u8, u8),
 }
 
 impl fmt::Display for Error {
@@ -28,18 +23,7 @@ impl fmt::Display for Error {
     }
 }
 
-impl fmt::Display for ValidationError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Max(m) => write!(f, "cannot be greater than {m}"),
-            Self::Order(r, l) => write!(f, "right value ({r}) must be less than left value ({l})"),
-        }
-    }
-}
-
 impl std::error::Error for Error {}
-
-impl std::error::Error for ValidationError {}
 
 impl From<io::Error> for Error {
     fn from(e: io::Error) -> Self {

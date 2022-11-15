@@ -1,7 +1,7 @@
 use std::fs;
 
-use crate::ensure;
-use crate::error::*;
+use crate::error::{Error, Result};
+use crate::validate;
 
 use super::level::BatteryLevel;
 
@@ -13,7 +13,7 @@ impl Percentage {
     const MAX: u8 = 100;
 
     pub fn new(val: u8) -> Result<Self> {
-        ensure!(val <= Self::MAX, ValidationError::Max(Self::MAX));
+        validate::max(Self::MAX, val)?;
         Ok(Self(val))
     }
 
@@ -85,9 +85,9 @@ pub struct Breakpoints {
 
 impl Breakpoints {
     pub fn new(critical: u8, low: u8, high: u8, full: u8) -> Result<Self> {
-        ensure!(critical < low, ValidationError::Order(critical, low));
-        ensure!(low < high, ValidationError::Order(low, high));
-        ensure!(high < full, ValidationError::Order(high, full));
+        validate::order(critical, low)?;
+        validate::order(low, high)?;
+        validate::order(high, full)?;
 
         Ok(Self {
             critical: Percentage::new(critical)?,
