@@ -1,5 +1,7 @@
 use std::{fmt, io, num};
 
+use notify_rust::{Notification, Urgency};
+
 use crate::validate::ValidationError;
 
 /// Convenient wrapper around `std::Result`.
@@ -40,6 +42,20 @@ impl From<num::ParseIntError> for Error {
 impl From<ValidationError> for Error {
     fn from(e: ValidationError) -> Self {
         Self::Validation(e)
+    }
+}
+
+impl From<Error> for Notification {
+    fn from(e: Error) -> Self {
+        let mut notification = Self::new();
+
+        notification
+            .summary("watchbat Error")
+            .body(e.to_string().as_str())
+            .urgency(Urgency::Critical)
+            .timeout(0);
+
+        notification
     }
 }
 
