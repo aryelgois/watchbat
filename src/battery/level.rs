@@ -60,35 +60,41 @@ mod tests {
     /// Should always give `None`.
     #[test]
     fn self_transition() {
-        fn run(level: &BatteryLevel) {
+        let levels = [&Unknown, &Critical, &Low, &Regular, &High, &Full];
+        for level in levels {
             test_transition(level, level, None);
         }
-
-        run(&Unknown);
-        run(&Critical);
-        run(&Low);
-        run(&Regular);
-        run(&High);
-        run(&Full);
     }
 
     /// Should give `None` when charging to `Low` or `Regular`.
     #[test]
     fn charging_transition() {
-        test_transition(&Unknown, &Critical, Some(BatteryStatus::Critical));
-        test_transition(&Critical, &Low, None);
-        test_transition(&Low, &Regular, None);
-        test_transition(&Regular, &High, Some(BatteryStatus::High));
-        test_transition(&High, &Full, Some(BatteryStatus::Full));
+        let entries = [
+            (&Unknown, &Critical, Some(BatteryStatus::Critical)),
+            (&Critical, &Low, None),
+            (&Low, &Regular, None),
+            (&Regular, &High, Some(BatteryStatus::High)),
+            (&High, &Full, Some(BatteryStatus::Full)),
+        ];
+
+        for (from, to, expected) in entries {
+            test_transition(from, to, expected);
+        }
     }
 
     /// Should give `None` when discharging to `High` or `Regular`.
     #[test]
     fn discharging_transition() {
-        test_transition(&Unknown, &Full, Some(BatteryStatus::Full));
-        test_transition(&Full, &High, None);
-        test_transition(&High, &Regular, None);
-        test_transition(&Regular, &Low, Some(BatteryStatus::Low));
-        test_transition(&Low, &Critical, Some(BatteryStatus::Critical));
+        let entries = [
+            (&Unknown, &Full, Some(BatteryStatus::Full)),
+            (&Full, &High, None),
+            (&High, &Regular, None),
+            (&Regular, &Low, Some(BatteryStatus::Low)),
+            (&Low, &Critical, Some(BatteryStatus::Critical)),
+        ];
+
+        for (from, to, expected) in entries {
+            test_transition(from, to, expected);
+        }
     }
 }
