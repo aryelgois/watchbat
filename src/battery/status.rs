@@ -3,7 +3,7 @@ use std::fmt;
 use notify_rust::{Notification, Urgency};
 
 /// Each `BatteryStatus` produces a `Notification`.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum BatteryStatus {
     Unknown,
     Critical,
