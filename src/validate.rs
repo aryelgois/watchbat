@@ -19,7 +19,7 @@ impl fmt::Display for ValidationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::Max(m) => write!(f, "cannot be greater than {m}"),
-            Self::Order(r, l) => write!(f, "right value ({r}) must be less than left value ({l})"),
+            Self::Order(l, r) => write!(f, "left value ({l}) must be less than right value ({r})"),
             Self::Required(name) => write!(f, "property '{name}' is required"),
         }
     }
@@ -72,8 +72,8 @@ mod max_tests {
     }
 }
 
-pub fn order(right: u8, left: u8) -> ValidationResult {
-    ensure!(right < left, ValidationError::Order(right, left));
+pub fn order(left: u8, right: u8) -> ValidationResult {
+    ensure!(left < right, ValidationError::Order(left, right));
     Ok(())
 }
 
