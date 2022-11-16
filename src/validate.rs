@@ -3,13 +3,16 @@ use std::fmt;
 use crate::ensure;
 
 /// Convenient wrapper around `std::Result`.
-type ValidationResult = ::std::result::Result<(), ValidationError>;
+///
+/// When `T` is specified, the validation function also transforms the input.
+type ValidationResult<T = ()> = ::std::result::Result<T, ValidationError>;
 
 /// An error when validating data.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ValidationError {
     Max(u8),
     Order(u8, u8),
+    Required(String),
 }
 
 impl fmt::Display for ValidationError {
@@ -17,6 +20,7 @@ impl fmt::Display for ValidationError {
         match self {
             Self::Max(m) => write!(f, "cannot be greater than {m}"),
             Self::Order(r, l) => write!(f, "right value ({r}) must be less than left value ({l})"),
+            Self::Required(name) => write!(f, "property '{name}' is required"),
         }
     }
 }
@@ -109,6 +113,41 @@ mod order_tests {
 
         for (a, b) in entries {
             assert!(order(a, b).is_err());
+        }
+    }
+}
+
+pub fn required(name: &str, val: String) -> ValidationResult<String> {
+    let clean = val.trim();
+
+    ensure!(
+        !clean.is_empty(),
+        ValidationError::Required(name.to_string())
+    );
+
+    Ok(clean.to_string())
+}
+
+#[cfg(test)]
+mod required_tests {
+    use super::required;
+
+    #[test]
+    fn is_ok() {
+        let vals = ["foo", "foo ", "\tfoo", "foo\n"];
+        let actual = Ok(String::from("foo"));
+
+        for val in vals {
+            let result = required("test_field", val.to_string());
+            assert_eq!(result, actual);
+        }
+    }
+
+    #[test]
+    fn is_err() {
+        let vals = ["", " ", "\t", "\n"];
+        for val in vals {
+            assert!(required("test_field", val.to_string()).is_err());
         }
     }
 }
