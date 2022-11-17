@@ -1,4 +1,7 @@
+use std::iter;
 use std::time::Duration;
+
+use notify_rust::Notification;
 
 use crate::error::Result;
 use crate::validate;
@@ -63,5 +66,16 @@ impl Watcher {
                 Err(e)
             }
         }
+    }
+}
+
+impl iter::Iterator for Watcher {
+    type Item = Option<Notification>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        Some(match self.update() {
+            Ok(status) => status.and_then(|s| Some(s.into())),
+            Err(e) => Some(e.into()),
+        })
     }
 }
