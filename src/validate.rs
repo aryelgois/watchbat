@@ -1,4 +1,5 @@
 use std::fmt;
+use std::time::Duration;
 
 use crate::ensure;
 
@@ -10,6 +11,7 @@ type ValidationResult<T = ()> = ::std::result::Result<T, ValidationError>;
 /// An error when validating data.
 #[derive(Debug, PartialEq)]
 pub enum ValidationError {
+    GreaterThanZero,
     Max(u8),
     Order(u8, u8),
     Required(String),
@@ -18,6 +20,7 @@ pub enum ValidationError {
 impl fmt::Display for ValidationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            Self::GreaterThanZero => write!(f, "must be greater than zero"),
             Self::Max(m) => write!(f, "cannot be greater than {m}"),
             Self::Order(l, r) => write!(f, "left value ({l}) must be less than right value ({r})"),
             Self::Required(name) => write!(f, "property '{name}' is required"),
@@ -26,6 +29,54 @@ impl fmt::Display for ValidationError {
 }
 
 impl std::error::Error for ValidationError {}
+
+pub fn greater_than_zero<T>(val: T) -> ValidationResult
+where
+    T: HasZero + PartialOrd,
+{
+    ensure!(val > T::zero(), ValidationError::GreaterThanZero);
+    Ok(())
+}
+
+/// Provides a zero value for comparison with `PartialOrd`.
+pub trait HasZero {
+    /// The zero value.
+    fn zero() -> Self;
+}
+
+impl HasZero for Duration {
+    fn zero() -> Self {
+        Self::ZERO
+    }
+}
+
+#[cfg(test)]
+mod greater_than_zero_tests {
+    use std::time::Duration;
+
+    use super::greater_than_zero;
+
+    #[test]
+    fn is_ok() {
+        let vals = [
+            Duration::from_nanos(1),
+            Duration::from_secs(1),
+            Duration::MAX,
+        ];
+
+        for val in vals {
+            assert!(greater_than_zero(val).is_ok());
+        }
+    }
+
+    #[test]
+    fn is_err() {
+        let vals = [Duration::ZERO, Duration::from_secs(0)];
+        for val in vals {
+            assert!(greater_than_zero(val).is_err());
+        }
+    }
+}
 
 pub fn max(limit: u8, actual: u8) -> ValidationResult {
     ensure!(actual <= limit, ValidationError::Max(limit));

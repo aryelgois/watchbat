@@ -18,6 +18,7 @@ pub struct Config {
 impl Config {
     pub fn new(battery_file: String, breakpoints: Breakpoints, interval: Duration) -> Result<Self> {
         let battery_file = validate::required("battery_file", battery_file)?;
+        validate::greater_than_zero(interval)?;
 
         Ok(Self {
             battery_file,
