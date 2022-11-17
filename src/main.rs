@@ -1,5 +1,6 @@
 mod battery;
 mod error;
+mod utils;
 mod validate;
 
 use std::time::Duration;
