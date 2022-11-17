@@ -4,6 +4,7 @@ use std::time::Duration;
 use notify_rust::Notification;
 
 use crate::error::Result;
+use crate::utils;
 use crate::validate;
 
 use super::level::BatteryLevel;
@@ -49,6 +50,16 @@ impl Watcher {
             config,
             state: BatteryLevel::default(),
         }
+    }
+
+    /// Starts the `Watcher`.
+    ///
+    /// It uses the `Watcher` as an `Iterator` that yields `Notification`
+    /// when the internal state changes.
+    pub fn run(self) -> impl iter::Iterator<Item = Notification> {
+        utils::on_interval(self.config.interval, true)
+            .zip(self.into_iter())
+            .filter_map(|(_, n)| n)
     }
 
     /// Gets a new `BatteryLevel` to update the internal state and produce a `BatteryStatus`.

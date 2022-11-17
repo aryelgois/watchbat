@@ -21,4 +21,8 @@ impl Default for Config {
 
 fn main() {
     let watcher = Watcher::new(Config::default());
+
+    for notification in watcher.run() {
+        notification.show().unwrap();
+    }
 }
