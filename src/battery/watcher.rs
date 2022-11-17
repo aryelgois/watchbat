@@ -65,7 +65,7 @@ impl Watcher {
     }
 
     /// Gets a new `BatteryLevel` to update the internal state and produce a `BatteryStatus`.
-    fn update(&mut self) -> Result<Option<BatteryStatus>> {
+    fn update(&mut self) -> Option<BatteryStatus> {
         match self.config.read_percentage() {
             Ok(percentage) => {
                 let level = self.config.breakpoints.get_level(&percentage);
@@ -77,11 +77,11 @@ impl Watcher {
                 );
 
                 self.state = level;
-                Ok(status)
+                status
             }
             Err(e) => {
                 self.state = BatteryLevel::Unknown;
-                Err(e)
+                Some(BatteryStatus::Unknown(Some(e.to_string())))
             }
         }
     }
@@ -91,9 +91,6 @@ impl iter::Iterator for Watcher {
     type Item = Option<Notification>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        Some(match self.update() {
-            Ok(status) => status.and_then(|s| Some(s.into())),
-            Err(e) => Some(e.into()),
-        })
+        Some(self.update().and_then(|s| Some(s.into())))
     }
 }

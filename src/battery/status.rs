@@ -5,7 +5,7 @@ use notify_rust::{Notification, Urgency};
 /// Each `BatteryStatus` produces a `Notification`.
 #[derive(Debug, PartialEq)]
 pub enum BatteryStatus {
-    Unknown,
+    Unknown(Option<String>),
     Critical,
     Low,
     High,
@@ -15,7 +15,7 @@ pub enum BatteryStatus {
 impl fmt::Display for BatteryStatus {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::Unknown => write!(f, "Battery is Unknown"),
+            Self::Unknown(_) => write!(f, "Battery is Unknown"),
             Self::Critical => write!(f, "Battery is Critical"),
             Self::Low => write!(f, "Battery is almost Empty"),
             Self::High => write!(f, "Battery is almost Full"),
@@ -33,7 +33,13 @@ impl From<BatteryStatus> for Notification {
         notification.summary(&status.to_string());
 
         match status {
-            BatteryStatus::Unknown | BatteryStatus::Critical => {
+            BatteryStatus::Unknown(Some(e)) => {
+                notification
+                    .body(e.as_str())
+                    .urgency(Urgency::Critical)
+                    .timeout(0);
+            }
+            BatteryStatus::Unknown(None) | BatteryStatus::Critical => {
                 notification.urgency(Urgency::Critical).timeout(0);
             }
             BatteryStatus::Low | BatteryStatus::Full => {

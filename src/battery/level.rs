@@ -30,7 +30,7 @@ impl BatteryLevel {
         }
 
         match (self, to) {
-            (_, Self::Unknown) => Some(BatteryStatus::Unknown),
+            (_, Self::Unknown) => Some(BatteryStatus::Unknown(None)),
 
             (_, Self::Critical) => Some(BatteryStatus::Critical),
 
