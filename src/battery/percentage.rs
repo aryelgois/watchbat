@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fmt, fs};
 
 use crate::error::{Error, Result};
 use crate::validate;
@@ -6,7 +6,7 @@ use crate::validate;
 use super::level::BatteryLevel;
 
 /// The amount of charge in the battery.
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(PartialEq, PartialOrd)]
 pub struct Percentage(u8);
 
 impl Percentage {
@@ -21,6 +21,12 @@ impl Percentage {
     pub fn open_and_parse_file(path: &str) -> Result<Self> {
         let contents = fs::read_to_string(path)?;
         Self::try_from(contents)
+    }
+}
+
+impl fmt::Debug for Percentage {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}%", self.0)
     }
 }
 
