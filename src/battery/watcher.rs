@@ -46,6 +46,8 @@ pub struct Watcher {
 
 impl Watcher {
     pub fn new(config: Config) -> Self {
+        eprintln!("config = {:#?}", config);
+
         Self {
             config,
             state: BatteryLevel::default(),
@@ -68,6 +70,11 @@ impl Watcher {
             Ok(percentage) => {
                 let level = self.config.breakpoints.get_level(&percentage);
                 let status = self.state.transition(&level);
+
+                eprintln!(
+                    "percentage: {:?}, level: {:?}, status: {:?}",
+                    percentage, level, status
+                );
 
                 self.state = level;
                 Ok(status)
