@@ -60,7 +60,7 @@ impl Watcher {
     /// when the internal state changes.
     pub fn run(self) -> impl iter::Iterator<Item = Notification> {
         utils::on_interval(self.config.interval, true)
-            .zip(self.into_iter())
+            .zip(self)
             .filter_map(|(_, n)| n)
     }
 
@@ -91,6 +91,6 @@ impl iter::Iterator for Watcher {
     type Item = Option<Notification>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        Some(self.update().and_then(|s| Some(s.into())))
+        Some(self.update().map(|s| s.into()))
     }
 }
