@@ -32,13 +32,13 @@ impl std::error::Error for ValidationError {}
 
 pub fn greater_than_zero<T>(val: T) -> ValidationResult
 where
-    T: HasZero + PartialOrd,
+    T: HasZero + Ord,
 {
     ensure!(val > T::zero(), ValidationError::GreaterThanZero);
     Ok(())
 }
 
-/// Provides a zero value for comparison with `PartialOrd`.
+/// Provides a zero value for comparison with `Ord`.
 pub trait HasZero {
     /// The zero value.
     fn zero() -> Self;
